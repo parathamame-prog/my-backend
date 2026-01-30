@@ -1,39 +1,78 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const app = express();
+
+app.use(express.static('public'));
 const PORT = process.env.PORT || 3000;
 
-// 1. Middleware: Frontend එකෙන් එවන JSON දත්ත කියවීමට මෙය අනිවාර්යයි
+// 1. Middleware: මෙය නැතුව JSON කියවන්න බැහැ
 app.use(express.json());
 
-// මූලික Route එක (Home)
+// 2. Database Connection
+const mongoDBURL = "mongodb+srv://admin:Milano%402020@cluster0.mjo8qeg.mongodb.net/?appName=Cluster0";
+
+mongoose.connect(mongoDBURL)
+    .then(() => console.log("✅ MongoDB Connected Successfully!"))
+    .catch((err) => console.log("❌ MongoDB Connection Error:", err));
+
+// 3. User Model (Schema)
+const UserSchema = new mongoose.Schema({
+    username: { type: String, required: true },
+    password: { type: String, required: true }
+});
+
+const User = mongoose.model('User', UserSchema);
+
+// 4. Home Route
 app.get('/', (req, res) => {
-    res.json({ message: "Welcome to my updated Backend API!" });
+    res.json({ message: "Backend is Running Smoothly!" });
 });
 
-// 2. GET Route - දත්ත යැවීම (Query Parameters)
-// උදාහරණ: /greet?name=Chathura
-app.get('/greet', (req, res) => {
-    const userName = req.query.name; // URL එකෙන් නම ලබා ගැනීම
-    if (userName) {
-        res.json({ message: `Hello, ${userName}! Welcome back.` });
-    } else {
-        res.json({ message: "Hello! I don't know your name yet." });
+// 5. REGISTER Route (අලුත් කෙනෙක් හැදීම)
+app.post('/register', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        console.log("📝 Registering User:", username); // Console එකේ පෙන්වයි
+
+        // Check if data is empty
+        if (!username || !password) {
+            return res.status(400).json({ success: false, message: "Username and Password required" });
+        }
+
+        const newUser = new User({ username, password });
+        await newUser.save();
+        
+        console.log("✅ User Saved to DB");
+        res.json({ success: true, message: "User Registered Successfully!" });
+
+    } catch (error) {
+        console.log("❌ Register Error:", error);
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
-// 3. POST Route - දත්ත ලබා ගැනීම (Receiving Data)
-// උදාහරණ: User කෙනෙක් Login වෙනකොට
-app.post('/login', (req, res) => {
-    const { username, password } = req.body; // Body එකෙන් දත්ත ගැනීම
+// 6. LOGIN Route (ඇතුල් වීම)
+app.post('/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        console.log("🔑 Login Attempt for:", username); // කවුද ලොග් වෙන්න හදන්නේ කියලා පෙන්වයි
 
-    // සරල පරීක්ෂාවක් (මෙය නිකන් උදාහරණයක් පමණි)
-    if (username === "admin" && password === "12345") {
-        res.json({ success: true, message: "Login Successful!" });
-    } else {
-        res.json({ success: false, message: "Invalid username or password" });
+        // Database එකේ නම සහ පාස්වර්ඩ් ගැලපෙන කෙනෙක් ඉන්නවද බැලීම
+        const user = await User.findOne({ username: username, password: password });
+
+        if (user) {
+            console.log("✅ User Found!");
+            res.json({ success: true, message: "Login Successful!", userId: user._id });
+        } else {
+            console.log("❌ User Not Found or Password Wrong");
+            res.json({ success: false, message: "Invalid username or password" });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
+// Start Server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
