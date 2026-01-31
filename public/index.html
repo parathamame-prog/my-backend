@@ -3,258 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Authentication</title>
-    <style>
-        /* 1. මූලික CSS (Design එක ලස්සන කිරීමට) */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f3f4f6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
+    <title>Engineers Planet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#0f172a',
+                        card: '#1e293b',
+                        primary: '#3b82f6',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
         }
-
-        /* කාඩ් එකේ හැඩය */
-        .card {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            width: 350px;
-            max-width: 90%;
-        }
-
-        .title {
-            text-align: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #111827;
-            margin-bottom: 0.5rem;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #6b7280;
-            font-size: 0.875rem;
-            margin-bottom: 1.5rem;
-        }
-
-        /* Tabs (Login/Register තෝරන තැන) */
-        .tabs {
-            display: flex;
-            background: #f3f4f6;
-            padding: 4px;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 8px;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            border-radius: 6px;
-            font-weight: 500;
-            color: #6b7280;
-            transition: all 0.3s;
-        }
-
-        .tab-btn.active {
-            background: white;
-            color: #000;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        /* Inputs සහ Button */
-        .input-group {
-            margin-bottom: 1rem;
-            text-align: left;
-        }
-
-        label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            color: #374151;
-        }
-
-        input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            box-sizing: border-box; /* වැදගත් */
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        input:focus {
-            border-color: #000;
-            ring: 2px solid #000;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 10px;
-            background-color: #111827;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        .submit-btn:hover {
-            background-color: #000;
-        }
-
-        /* පණිවිඩ පෙන්වන කොටස */
-        #message-box {
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            display: none; /* මුලින් පෙනෙන්නේ නෑ */
-        }
-        .success { background-color: #d1fae5; color: #065f46; border: 1px solid #34d399; }
-        .error { background-color: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
-
-        /* Forms සැඟවීම සහ පෙන්වීම */
-        .form-section { display: none; animation: fadeIn 0.3s; }
-        .form-section.active { display: block; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
+    </script>
 </head>
-<body>
+<body class="bg-dark text-white font-sans antialiased">
 
-    <div class="card">
-        <div class="title">Welcome Back</div>
-        <div class="subtitle">Enter your details to access your account</div>
-
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('login')">Login</button>
-            <button class="tab-btn" onclick="switchTab('register')">Register</button>
+    <nav class="fixed w-full z-50 bg-dark/80 backdrop-blur-md border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-2">
+                    <div class="bg-primary/20 p-2 rounded-lg">
+                        <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                    </div>
+                    <span class="text-xl font-bold tracking-tight">Engineers Planet</span>
+                </div>
+                
+                <button onclick="openModal()" class="bg-primary hover:bg-blue-600 text-white px-6 py-2 rounded-full text-sm font-semibold transition-all shadow-lg shadow-blue-500/30">
+                    Sign In
+                </button>
+            </div>
         </div>
+    </nav>
 
-        <div id="login-form" class="form-section active">
-            <form onsubmit="handleLogin(event)">
-                <div class="input-group">
-                    <label>Username</label>
-                    <input type="text" id="login-username" placeholder="Enter your username" required>
+    <div class="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-primary/20 rounded-full blur-[120px] -z-10"></div>
+
+        <div class="text-center px-4 max-w-4xl mx-auto">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-sm text-blue-300 mb-8">
+                <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                v2.0 is now live
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-gray-400">
+                Where Engineers <br> Build the Future.
+            </h1>
+            
+            <p class="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+                Join the ultimate community for developers. Share code, collaborate on projects, and deploy your ideas in seconds.
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="openModal()" class="px-8 py-4 bg-primary hover:bg-blue-600 rounded-xl font-bold text-lg shadow-xl shadow-blue-500/20 transition-transform hover:scale-105">
+                    Get Started Free
+                </button>
+                <button class="px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl font-bold text-lg backdrop-blur-sm transition-all">
+                    View Projects
+                </button>
+            </div>
+
+            <div class="mt-20 grid grid-cols-3 gap-8 border-t border-white/10 pt-10">
+                <div>
+                    <div class="text-3xl font-bold text-white">10k+</div>
+                    <div class="text-sm text-gray-500 uppercase tracking-wider mt-1">Users</div>
                 </div>
-                <div class="input-group">
-                    <label>Password</label>
-                    <input type="password" id="login-password" placeholder="Enter your password" required>
+                <div>
+                    <div class="text-3xl font-bold text-white">500+</div>
+                    <div class="text-sm text-gray-500 uppercase tracking-wider mt-1">Projects</div>
                 </div>
-                <button type="submit" class="submit-btn">Sign In</button>
-            </form>
+                <div>
+                    <div class="text-3xl font-bold text-white">99%</div>
+                    <div class="text-sm text-gray-500 uppercase tracking-wider mt-1">Uptime</div>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <div id="register-form" class="form-section">
-            <form onsubmit="handleRegister(event)">
-                <div class="input-group">
-                    <label>New Username</label>
-                    <input type="text" id="reg-username" placeholder="Choose a username" required>
+    <div id="authModal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeModal()"></div>
+        
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md p-6">
+            <div class="bg-card border border-white/10 rounded-2xl shadow-2xl overflow-hidden relative">
+                
+                <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+
+                <div class="p-8">
+                    <h2 class="text-2xl font-bold mb-6 text-center">Welcome Back</h2>
+                    
+                    <div class="flex bg-dark/50 p-1 rounded-lg mb-6">
+                        <button onclick="switchTab('login')" id="tab-login" class="flex-1 py-2 text-sm font-semibold rounded-md bg-primary text-white shadow-sm transition-all">Login</button>
+                        <button onclick="switchTab('register')" id="tab-register" class="flex-1 py-2 text-sm font-semibold rounded-md text-gray-400 hover:text-white transition-all">Register</button>
+                    </div>
+
+                    <div id="alertBox" class="hidden mb-4 p-3 rounded-lg text-sm text-center"></div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1 uppercase">Username</label>
+                            <input type="text" id="username" class="w-full bg-dark border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="Enter username">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1 uppercase">Password</label>
+                            <input type="password" id="password" class="w-full bg-dark border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="••••••••">
+                        </div>
+                        
+                        <button onclick="handleAuth()" id="submitBtn" class="w-full bg-primary hover:bg-blue-600 text-white font-bold py-3 rounded-lg shadow-lg shadow-blue-500/25 transition-all transform active:scale-95">
+                            Sign In
+                        </button>
+                    </div>
                 </div>
-                <div class="input-group">
-                    <label>New Password</label>
-                    <input type="password" id="reg-password" placeholder="Choose a password" required>
-                </div>
-                <button type="submit" class="submit-btn">Create Account</button>
-            </form>
+            </div>
         </div>
-
-        <div id="message-box"></div>
     </div>
 
     <script>
-        // 1. Tab මාරු කරන Function එක
-        function switchTab(tab) {
-            // බොත්තම් පාට මාරු කිරීම
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+        let currentMode = 'login';
 
-            // Form මාරු කිරීම
-            document.querySelectorAll('.form-section').forEach(form => form.classList.remove('active'));
-            document.getElementById(tab + '-form').classList.add('active');
-
-            // Message box එක සැඟවීම
-            showMessage('', '');
+        function openModal() {
+            document.getElementById('authModal').classList.remove('hidden');
         }
 
-        // 2. පණිවිඩ පෙන්වන Function එක
-        function showMessage(type, text) {
-            const box = document.getElementById('message-box');
-            if (!text) {
-                box.style.display = 'none';
+        function closeModal() {
+            document.getElementById('authModal').classList.add('hidden');
+            document.getElementById('alertBox').classList.add('hidden');
+        }
+
+        function switchTab(mode) {
+            currentMode = mode;
+            const loginTab = document.getElementById('tab-login');
+            const regTab = document.getElementById('tab-register');
+            const btn = document.getElementById('submitBtn');
+
+            if(mode === 'login') {
+                loginTab.className = 'flex-1 py-2 text-sm font-semibold rounded-md bg-primary text-white shadow-sm transition-all';
+                regTab.className = 'flex-1 py-2 text-sm font-semibold rounded-md text-gray-400 hover:text-white transition-all';
+                btn.innerText = 'Sign In';
+            } else {
+                regTab.className = 'flex-1 py-2 text-sm font-semibold rounded-md bg-primary text-white shadow-sm transition-all';
+                loginTab.className = 'flex-1 py-2 text-sm font-semibold rounded-md text-gray-400 hover:text-white transition-all';
+                btn.innerText = 'Create Account';
+            }
+        }
+
+        async function handleAuth() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const alertBox = document.getElementById('alertBox');
+            
+            if(!username || !password) {
+                showAlert('Please fill in all fields', 'error');
                 return;
             }
-            box.style.display = 'block';
-            box.className = type; // 'success' or 'error'
-            box.innerText = text;
-        }
 
-        // 3. Login Logic
-        async function handleLogin(e) {
-            e.preventDefault(); // පිටුව refresh වීම නවතයි
-            showMessage('', ''); // පරණ පණිවිඩ මකයි
-
-            const username = document.getElementById('login-username').value;
-            const password = document.getElementById('login-password').value;
+            const endpoint = currentMode === 'login' ? '/login' : '/register';
 
             try {
-                const response = await fetch('/login', {
+                const res = await fetch(endpoint, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username, password})
                 });
-                const data = await response.json();
+                const data = await res.json();
 
-                if (data.success) {
-                    showMessage('success', '✅ ' + data.message);
+                if(data.success) {
+                    showAlert(data.message, 'success');
+                    if(currentMode === 'register') {
+                        setTimeout(() => switchTab('login'), 1500);
+                    } else {
+                        setTimeout(() => {
+                            closeModal();
+                            alert('Welcome ' + username + '!');
+                        }, 1000);
+                    }
                 } else {
-                    showMessage('error', '❌ ' + (data.message || 'Login failed'));
+                    showAlert(data.message || 'Error occurred', 'error');
                 }
-            } catch (err) {
-                showMessage('error', 'Connection Error');
+            } catch(e) {
+                showAlert('Server Error', 'error');
             }
         }
 
-        // 4. Register Logic
-        async function handleRegister(e) {
-            e.preventDefault();
-            showMessage('', '');
-
-            const username = document.getElementById('reg-username').value;
-            const password = document.getElementById('reg-password').value;
-
-            try {
-                const response = await fetch('/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                const data = await response.json();
-
-                if (data.success) {
-                    showMessage('success', '✅ ' + data.message);
-                    // සාර්ථක නම් තත්පර 1කින් Login එකට මාරු වෙමු (Auto Switch)
-                    setTimeout(() => switchTab('login'), 1500); 
-                } else {
-                    showMessage('error', '❌ ' + (data.error || data.message));
-                }
-            } catch (err) {
-                showMessage('error', 'Connection Error');
+        function showAlert(msg, type) {
+            const box = document.getElementById('alertBox');
+            box.innerText = msg;
+            box.classList.remove('hidden', 'bg-red-500/20', 'text-red-400', 'bg-green-500/20', 'text-green-400');
+            
+            if(type === 'error') {
+                box.classList.add('bg-red-500/20', 'text-red-400');
+            } else {
+                box.classList.add('bg-green-500/20', 'text-green-400');
             }
+            box.classList.remove('hidden');
         }
     </script>
 </body>
