@@ -1,51 +1,261 @@
-<script>
-    // Register Function (යාවත්කාලීන කරන ලදී)
-    async function registerUser() {
-        const username = document.getElementById('reg-username').value;
-        const password = document.getElementById('reg-password').value;
-
-        try {
-            const response = await fetch('/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
-
-            const data = await response.json();
-
-            // මෙන්න මෙතනයි වෙනස:
-            if (data.success) {
-                alert("✅ " + data.message); // සාර්ථක නම් Message එක
-            } else {
-                // අසාර්ථක නම් Error එක හෝ Message එක පෙන්වන්න
-                alert("⚠️ Error: " + (data.error || data.message));
-            }
-        } catch (err) {
-            alert("❌ System Error: " + err);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication</title>
+    <style>
+        /* 1. මූලික CSS (Design එක ලස්සන කිරීමට) */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
-    }
 
-    // Login Function
-    async function loginUser() {
-        const username = document.getElementById('login-username').value;
-        const password = document.getElementById('login-password').value;
-
-        try {
-            const response = await fetch('/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
-
-            const data = await response.json();
-            
-            if (data.success) {
-                alert("✅ " + data.message);
-            } else {
-                alert("❌ " + (data.message || data.error));
-            }
-        } catch (err) {
-            alert("❌ System Error: " + err);
+        /* කාඩ් එකේ හැඩය */
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            width: 350px;
+            max-width: 90%;
         }
-    }
-</script>
+
+        .title {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Tabs (Login/Register තෝරන තැන) */
+        .tabs {
+            display: flex;
+            background: #f3f4f6;
+            padding: 4px;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 500;
+            color: #6b7280;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #000;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Inputs සහ Button */
+        .input-group {
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            box-sizing: border-box; /* වැදගත් */
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            border-color: #000;
+            ring: 2px solid #000;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #111827;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            background-color: #000;
+        }
+
+        /* පණිවිඩ පෙන්වන කොටස */
+        #message-box {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            display: none; /* මුලින් පෙනෙන්නේ නෑ */
+        }
+        .success { background-color: #d1fae5; color: #065f46; border: 1px solid #34d399; }
+        .error { background-color: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+
+        /* Forms සැඟවීම සහ පෙන්වීම */
+        .form-section { display: none; animation: fadeIn 0.3s; }
+        .form-section.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="title">Welcome Back</div>
+        <div class="subtitle">Enter your details to access your account</div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('login')">Login</button>
+            <button class="tab-btn" onclick="switchTab('register')">Register</button>
+        </div>
+
+        <div id="login-form" class="form-section active">
+            <form onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <label>Username</label>
+                    <input type="text" id="login-username" placeholder="Enter your username" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="submit-btn">Sign In</button>
+            </form>
+        </div>
+
+        <div id="register-form" class="form-section">
+            <form onsubmit="handleRegister(event)">
+                <div class="input-group">
+                    <label>New Username</label>
+                    <input type="text" id="reg-username" placeholder="Choose a username" required>
+                </div>
+                <div class="input-group">
+                    <label>New Password</label>
+                    <input type="password" id="reg-password" placeholder="Choose a password" required>
+                </div>
+                <button type="submit" class="submit-btn">Create Account</button>
+            </form>
+        </div>
+
+        <div id="message-box"></div>
+    </div>
+
+    <script>
+        // 1. Tab මාරු කරන Function එක
+        function switchTab(tab) {
+            // බොත්තම් පාට මාරු කිරීම
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Form මාරු කිරීම
+            document.querySelectorAll('.form-section').forEach(form => form.classList.remove('active'));
+            document.getElementById(tab + '-form').classList.add('active');
+
+            // Message box එක සැඟවීම
+            showMessage('', '');
+        }
+
+        // 2. පණිවිඩ පෙන්වන Function එක
+        function showMessage(type, text) {
+            const box = document.getElementById('message-box');
+            if (!text) {
+                box.style.display = 'none';
+                return;
+            }
+            box.style.display = 'block';
+            box.className = type; // 'success' or 'error'
+            box.innerText = text;
+        }
+
+        // 3. Login Logic
+        async function handleLogin(e) {
+            e.preventDefault(); // පිටුව refresh වීම නවතයි
+            showMessage('', ''); // පරණ පණිවිඩ මකයි
+
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('success', '✅ ' + data.message);
+                } else {
+                    showMessage('error', '❌ ' + (data.message || 'Login failed'));
+                }
+            } catch (err) {
+                showMessage('error', 'Connection Error');
+            }
+        }
+
+        // 4. Register Logic
+        async function handleRegister(e) {
+            e.preventDefault();
+            showMessage('', '');
+
+            const username = document.getElementById('reg-username').value;
+            const password = document.getElementById('reg-password').value;
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('success', '✅ ' + data.message);
+                    // සාර්ථක නම් තත්පර 1කින් Login එකට මාරු වෙමු (Auto Switch)
+                    setTimeout(() => switchTab('login'), 1500); 
+                } else {
+                    showMessage('error', '❌ ' + (data.error || data.message));
+                }
+            } catch (err) {
+                showMessage('error', 'Connection Error');
+            }
+        }
+    </script>
+</body>
+</html>
